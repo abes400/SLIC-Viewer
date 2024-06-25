@@ -44,8 +44,8 @@ public class NewDialog extends JDialog {
         widthTF = new JTextField("500");
         heightTF = new JTextField("500");
 
-        widthTF.setBounds(100, 25, 60, 25);
-        heightTF.setBounds(100, 55, 60, 25);
+        widthTF.setBounds(120, 25, 60, 25);
+        heightTF.setBounds(120, 55, 60, 25);
 
         widthTF.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {

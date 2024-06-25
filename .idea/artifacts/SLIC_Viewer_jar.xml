@@ -1,4 +1,4 @@
-<component name="ArtifactManager">
+﻿<component name="ArtifactManager">
   <artifact type="jar" name="SLIC Viewer:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/SLIC_Viewer_jar</output-path>
     <root id="archive" name="SLIC Viewer.jar">

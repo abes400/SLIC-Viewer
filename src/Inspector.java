@@ -74,7 +74,11 @@ public class Inspector extends JDialog {
     public Inspector() {
         // Initializing the dialog base
         setTitle(resourceBundle.getString("INSPECTOR_TITLE"));
-        setPreferredSize(new Dimension(210, 270));
+        if(System.getProperty("os.name").toLowerCase().contains("mac"))
+            setPreferredSize(new Dimension(210, 270));
+        else
+            setPreferredSize(new Dimension(225, 270));
+
         setResizable(false);
 
         // Initializing Layouts

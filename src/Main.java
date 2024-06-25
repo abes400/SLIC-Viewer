@@ -39,7 +39,7 @@ import javax.swing.event.ChangeListener;
 
 public class Main {
     
-    static final int MANIPOFFSET = 25;
+    static int MANIPOFFSET = 25;
     private static ResourceBundle resourceBundle = StringBundle.getInstance();
 
     // image : The object that is sent to the canvasWindow,
@@ -66,8 +66,13 @@ public class Main {
 
 
         // Using Mac's own toolbar instead of in-window toolbar.
-        if(System.getProperty("os.name").toLowerCase().contains("mac"))
+        if(System.getProperty("os.name").toLowerCase().contains("mac")){
             System.setProperty("apple.laf.useScreenMenuBar", "true");
+            MANIPOFFSET = 25;
+        } else MANIPOFFSET = -5;
+
+        System.out.println(MANIPOFFSET);
+
 
         // Making the app look sleek
         UIManager.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
