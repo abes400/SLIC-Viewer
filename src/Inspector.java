@@ -17,23 +17,17 @@
  * */
 // Written by İ.K. Bilir (Abes400)
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
+import com.formdev.flatlaf.icons.*;
+
+import java.awt.*;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 
 /**
@@ -43,14 +37,35 @@ import javax.swing.JPanel;
  */
 public class Inspector extends JDialog {
     // Initializing the strings
-    private final static JLabel currentFile = new JLabel("Select a file..."), // Shows the file open.
-                                width = new JLabel(""),
-                                height = new JLabel("");
+
+    private static ResourceBundle resourceBundle = StringBundle.getInstance();
+    private final static JLabel fillLBL = new JLabel();
 
     // Initializing the buttons
-    public static JButton open = new JButton("Open..."),
-                          saveAsSLC = new JButton("Save as SLIC"),
-                          saveAsBMP = new JButton("Save as BITMAP");
+    public static JButton open = new JButton(),
+                          newFile = new JButton("+"),
+                          saveAsSLC = new JButton(".slc"),
+                          saveAsBMP = new JButton(".bmp"),
+                          currentColor = new JButton(),
+                          pen = new JButton(),
+                          line = new JButton(),
+                          rectangle = new JButton(),
+                          circle = new JButton();
+
+    public final static int PEN = 0, LINE = 1, RECTANGLE = 2, CIRCLE = 3;
+
+    public static int mode;
+    public final static int[][] presetColors = {{0, 16711680, 16749824, 11206400, 2555648, 65386},
+                                                {5987419, 8848388, 9391104, 5476096, 36610, 36691},
+                                                {11119530, 65531, 40447, 19711, 13369599, 16711803},
+                                                {16777215, 3700346, 936071, 925831, 5574279, 8851027}};
+
+    public static Color color1;
+
+    public static JSlider thicknessControl = new JSlider(1, 50, 1);
+    public static JCheckBox fill = new JCheckBox();
+
+
 
     /**
      * Creates a new Inspector dialog.
@@ -58,33 +73,24 @@ public class Inspector extends JDialog {
      */
     public Inspector() {
         // Initializing the dialog base
-        setTitle("Inspector");
-        setPreferredSize(new Dimension(280, 190));
+        setTitle(resourceBundle.getString("INSPECTOR_TITLE"));
+        setPreferredSize(new Dimension(210, 270));
         setResizable(false);
 
         // Initializing Layouts
-        JPanel subGri = new JPanel(), innerGri = new JPanel(), middle = new JPanel();
+        JPanel subGri = new JPanel(), innerGri = new JPanel(), colorGri = new JPanel(), innerGri2 = new JPanel();
         GridBagConstraints gbc = new GridBagConstraints();
-        subGri.setLayout(new GridLayout(2, 1));
         innerGri.setLayout(new GridLayout(1, 2));
-        middle.setLayout(new GridBagLayout());
+        innerGri2.setLayout(new GridLayout(1, 2));
+        subGri.setLayout(new GridLayout(2, 1));
+        colorGri.setLayout(null);
         setLayout(new BorderLayout());
-
-
-        // Initiating a new Label with the image file containing the application's logo.
-
-        try {
-            JLabel logo = new JLabel( new ImageIcon(
-                    ImageIO.read(Objects.requireNonNull(
-                            getClass().getResource("/Artworks/emblem.png")))
-                            .getScaledInstance(25, 25, Image.SCALE_DEFAULT)));
-            logo.setBounds(0, 0, 25, 25);
-            add(logo);
-        } catch (IOException e) { throw new RuntimeException(e); }
-
 
         // Setting Button props.
         open.setFocusable(false);
+        open.setIcon(new FlatFileViewFileIcon());
+
+        newFile.setFocusable(false);
 
         saveAsSLC.setFocusable(false);
         saveAsSLC.setEnabled(false);
@@ -92,23 +98,154 @@ public class Inspector extends JDialog {
         saveAsBMP.setFocusable(false);
         saveAsBMP.setEnabled(false);
 
-        add(middle, BorderLayout.CENTER);
-        add(subGri, BorderLayout.SOUTH);
+        pen.setFocusable(false);
+        pen.setBounds(140, 60, 30, 30);
+
+        rectangle.setFocusable(false);
+        rectangle.setBounds(140, 90, 30, 30);
+
+        circle.setFocusable(false);
+        circle.setBounds(170, 90, 30, 30);
+
+        line.setFocusable(false);
+        line.setBounds(170, 60, 30, 30);
+
+        thicknessControl.setBounds(140, 120, 60, 30);
+        thicknessControl.setFocusable(false);
+
+        fill.setBounds(140, 150, 30, 30);
+        fill.setFocusable(false);
+
+        fillLBL.setBounds(170, 150, 30, 30);
+
+        // Setting button icons
+        try{
+            pen.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
+                            getClass().getResource("/Artworks/pen.png")))
+                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
+
+            line.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
+                            getClass().getResource("/Artworks/line.png")))
+                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
+
+            rectangle.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
+                            getClass().getResource("/Artworks/rect.png")))
+                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
+
+            circle.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
+                            getClass().getResource("/Artworks/oval.png")))
+                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
+
+            fillLBL.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
+                            getClass().getResource("/Artworks/fill.png")))
+                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
+
+            saveAsSLC.setIcon(new FlatFileViewFloppyDriveIcon());
+            saveAsBMP.setIcon(new FlatFileViewFloppyDriveIcon());
+        } catch (IOException e) {throw new RuntimeException(e);}
+
+
+        add(subGri, BorderLayout.NORTH);
 
         // Adding components
         gbc.gridx = 1;
         gbc.gridy = 1;
-        middle.add(currentFile, gbc);       gbc.gridy = 2;
-        middle.add(new JPanel(), gbc);      gbc.gridy = 3;
-        middle.add(width, gbc);             gbc.gridy = 4;
-        middle.add(height, gbc);
 
-        subGri.add(open);
-        subGri.add(innerGri);
+        colorGri.setBounds(10, 0, 180, 120);
+
+        for(int y = 0; y < 6; y ++) {
+            for(int x = 0; x < 4 ; x ++) {
+                JButton tempButton = new JButton();
+                tempButton.setBounds(x * 30, y * 30, 30, 30);
+                tempButton.setFocusable(false);
+                tempButton.setBackground(new Color(presetColors[x][y]));
+                tempButton.addActionListener(e -> setCurrentColor(tempButton.getBackground()));
+                colorGri.add(tempButton);
+            }
+        }
+
+
+
+        currentColor.setBounds(140, 0, 60, 60);
+        currentColor.setFocusable(false);
+
+        add(colorGri, BorderLayout.CENTER);
+
+        colorGri.add(pen);
+        colorGri.add(line);
+        colorGri.add(rectangle);
+        colorGri.add(circle);
+        colorGri.add(currentColor);
+
+        colorGri.add(thicknessControl);
+        colorGri.add(fill);
+        colorGri.add(fillLBL);
+
+
+        innerGri2.add(newFile);
+        innerGri2.add(open);
         innerGri.add(saveAsSLC);
         innerGri.add(saveAsBMP);
+        subGri.add(innerGri2);
+        subGri.add(innerGri);
+
         pack();
+
+        // Assigning functions
+        pen.addActionListener(e -> getPenTool());
+        line.addActionListener(e -> getLineTool());
+        rectangle.addActionListener(e -> getRectTool());
+        circle.addActionListener(e -> getCircleTool());
+
+        getPenTool();
+        setCurrentColor(Color.BLACK);
     }
+
+    private void setCurrentColor(Color newColor) {
+        currentColor.setBackground(newColor);
+        color1 = newColor;
+    }
+
+    private void getCircleTool() {
+        mode = CIRCLE;
+        circle.setBackground(Color.LIGHT_GRAY);
+        line.setBackground(Color.WHITE);
+        rectangle.setBackground(Color.WHITE);
+        pen.setBackground(Color.WHITE);
+        fill.setVisible(true);
+        fillLBL.setVisible(true);
+    }
+
+    private void getRectTool() {
+        mode = RECTANGLE;
+        rectangle.setBackground(Color.LIGHT_GRAY);
+        line.setBackground(Color.WHITE);
+        circle.setBackground(Color.WHITE);
+        pen.setBackground(Color.WHITE);
+        fill.setVisible(true);
+        fillLBL.setVisible(true);
+    }
+
+    private void getLineTool() {
+        mode = LINE;
+        line.setBackground(Color.LIGHT_GRAY);
+        rectangle.setBackground(Color.WHITE);
+        circle.setBackground(Color.WHITE);
+        pen.setBackground(Color.WHITE);
+        fill.setVisible(false);
+        fillLBL.setVisible(false);
+    }
+
+    private void getPenTool() {
+        mode = PEN;
+        pen.setBackground(Color.LIGHT_GRAY);
+        line.setBackground(Color.WHITE);
+        circle.setBackground(Color.WHITE);
+        rectangle.setBackground(Color.WHITE);
+        fill.setVisible(false);
+        fillLBL.setVisible(false);
+    }
+
 
     /**
      * Simply call this function so that the inspector can view the filename, width and height.
@@ -118,11 +255,6 @@ public class Inspector extends JDialog {
      * @since 1.0
      */
     public void setInformation(String name, int columns, int rows) {
-        currentFile.setText("Currently viewing: " + name);
-
-        width.setText("Width: " + columns);
-        height.setText("Height: " + rows);
-
         saveAsSLC.setEnabled(true);
         saveAsBMP.setEnabled(true);
         open.setEnabled(true);
@@ -135,11 +267,6 @@ public class Inspector extends JDialog {
      * @since 1.0
      */
     public void waitOpening(String name) {
-        currentFile.setText("Opening " + name + "...");
-
-        width.setText("");
-        height.setText("");
-
         saveAsSLC.setEnabled(false);
         saveAsBMP.setEnabled(false);
         open.setEnabled(false);
@@ -151,11 +278,6 @@ public class Inspector extends JDialog {
      * @since 1.0
      */
     public void waitCompressing() {
-        currentFile.setText("Compressing...");
-
-        width.setText("");
-        height.setText("");
-
         saveAsSLC.setEnabled(false);
         saveAsBMP.setEnabled(false);
         open.setEnabled(false);
@@ -166,13 +288,9 @@ public class Inspector extends JDialog {
      * @since 1.0
      */
     public void error() {
-        currentFile.setText("Unsupported file.");
-
-        width.setText("");
-        height.setText("");
-
         saveAsSLC.setEnabled(false);
         saveAsBMP.setEnabled(false);
         open.setEnabled(true);
+        Main.canvasWindow.setTitle(StringBundle.getInstance().getString("INSPECTOR_ERR"));
     }
 }

@@ -20,8 +20,9 @@
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ResourceBundle;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 
 /**
  * The class that reduces complex code snippets for selecting a file or directory using JFileChooser to a few
@@ -84,5 +85,46 @@ public class FileOperations {
             path = Paths.get(temp);
 
         } else if (result == JFileChooser.CANCEL_OPTION) path = null;
+    }
+
+    public static void initializeJFileChooser(){
+        ResourceBundle fileChooserBundle = ResourceBundle.getBundle("FCStrings");
+        UIManager.put("FileChooser.openDialogTitleText", fileChooserBundle.getString("openDialogTitleText"));
+        UIManager.put("FileChooser.saveDialogTitleText", fileChooserBundle.getString("saveDialogTitleText"));
+        UIManager.put("FileChooser.lookInLabelText", fileChooserBundle.getString("lookInLabelText"));
+        UIManager.put("FileChooser.saveInLabelText", fileChooserBundle.getString("saveInLabelText"));
+
+        UIManager.put("FileChooser.openButtonText", fileChooserBundle.getString("openButtonText"));
+        UIManager.put("FileChooser.saveButtonText", fileChooserBundle.getString("saveButtonText"));
+        UIManager.put("FileChooser.cancelButtonText", fileChooserBundle.getString("cancelButtonText"));
+        UIManager.put("FileChooser.updateButtonText", fileChooserBundle.getString("updateButtonText"));
+        UIManager.put("FileChooser.helpButtonText", fileChooserBundle.getString("helpButtonText"));
+        UIManager.put("FileChooser.okButtonText", fileChooserBundle.getString("okButtonText"));
+        UIManager.put("FileChooser.directoryOpenButtonText", fileChooserBundle.getString("directoryOpenButtonText"));
+        UIManager.put("FileChooser.approveButtonText", fileChooserBundle.getString("approveButtonText"));
+        UIManager.put("FileChooser.approveButtonToolTipText", fileChooserBundle.getString("approveButtonToolTipText"));
+
+        UIManager.put("FileChooser.fileNameLabelText", fileChooserBundle.getString("fileNameLabelText"));
+        UIManager.put("FileChooser.fileOfTypeLabelText", fileChooserBundle.getString("fileOfTypeLabelText"));
+        UIManager.put("FileChooser.upFolderToolTipText", fileChooserBundle.getString("upFolderToolTipText"));
+        UIManager.put("FileChooser.homeFolderToolTipText", fileChooserBundle.getString("homeFolderToolTipText"));
+        UIManager.put("FileChooser.newFolderToolTipText", fileChooserBundle.getString("newFolderToolTipText"));
+        UIManager.put("FileChooser.listViewButtonToolTipText", fileChooserBundle.getString("listViewButtonToolTipText"));
+        UIManager.put("FileChooser.detailsViewButtonToolTipText", fileChooserBundle.getString("detailsViewButtonToolTipText"));
+
+        UIManager.put("FileChooser.fileNameHeaderText", fileChooserBundle.getString("fileNameHeaderText"));
+        UIManager.put("FileChooser.fileSizeHeaderText", fileChooserBundle.getString("fileSizeHeaderText"));
+        UIManager.put("FileChooser.fileTypeHeaderText", fileChooserBundle.getString("fileTypeHeaderText"));
+        UIManager.put("FileChooser.fileDateHeaderText", fileChooserBundle.getString("fileDateHeaderText"));
+        UIManager.put("FileChooser.fileAttrHeaderText", fileChooserBundle.getString("fileAttrHeaderText"));
+
+        UIManager.put("FileChooser.acceptAllFileFilterText", fileChooserBundle.getString("acceptAllFileFilterText"));
+        UIManager.put("FileChooser.directoryDescriptionText", fileChooserBundle.getString("directoryDescriptionText"));
+        UIManager.put("FileChooser.fileDescriptionText", fileChooserBundle.getString("fileDescriptionText"));
+        UIManager.put("FileChooser.saveButtonToolTipText", fileChooserBundle.getString("saveButtonToolTipText"));
+        UIManager.put("FileChooser.openButtonToolTipText", fileChooserBundle.getString("openButtonToolTipText"));
+        UIManager.put("FileChooser.cancelButtonToolTipText", fileChooserBundle.getString("cancelButtonToolTipText"));
+        UIManager.put("FileChooser.updateButtonToolTipText", fileChooserBundle.getString("updateButtonToolTipText"));
+        UIManager.put("FileChooser.helpButtonToolTipText", fileChooserBundle.getString("helpButtonToolTipText"));
     }
 }

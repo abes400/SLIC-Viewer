@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 /**
  * The singleton class that contains a dialog with the information about the SLC Viewer application itself.
@@ -40,6 +41,7 @@ import java.util.Objects;
  */
 public class About extends JDialog{
     private static About aboutInstance = null;
+    private ResourceBundle resourceBundle = StringBundle.getInstance();
 
 
     /**
@@ -49,7 +51,7 @@ public class About extends JDialog{
     private About() {
 
         // Initiating a SLIC Viewer dialog object with the title "SLIC Viewer"
-        setTitle("About SLIC Viewer");
+        setTitle(resourceBundle.getString("ABOUT_TITLE"));
         setLayout(null);
         setSize(510, 320);
         setResizable(false);
@@ -71,7 +73,7 @@ public class About extends JDialog{
 
 
         // Initiating the JLabel containing the information about the application.
-        JLabel text = new JLabel("Version 1.0");
+        JLabel text = new JLabel(resourceBundle.getString("ABOUT_VER"));
 
         // Setting the coordinates and size of each index
         text.setBounds(410, 5, 500, 60);
@@ -86,7 +88,7 @@ public class About extends JDialog{
             // Creating an InputStream instance "inputStream" for streaming out of "GPL_Notice_and_Credits.txt"
             // then creating an InputStreamReader named "isr" with the "inputStream"
             // then creating a BufferedReader "br" with the "isr"
-            InputStream inputStream = getClass().getResourceAsStream("GPL_Notice_and_Credits.txt");
+            InputStream inputStream = getClass().getResourceAsStream(resourceBundle.getString("ABOUT_CREDITS"));
             assert inputStream != null;
             InputStreamReader isr = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(isr);

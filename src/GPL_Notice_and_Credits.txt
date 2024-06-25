@@ -4,8 +4,8 @@ Squares and Lines Image Compression Format (SLIC) (.slc)
 SLIC Viewer
 ________________________________________________________________________
 
-Designed by Ibrahim Kaan Bilir (Abes400) - Licenced under GPL v3 License
-January 22, 2024
+Designed by Ibrahim Kaan Bilir (Abes400) - Distributed under GPL v3 License
+June 25, 2024
 ________________________________________________________________________
 
 

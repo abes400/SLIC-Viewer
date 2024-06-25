@@ -37,9 +37,12 @@ public class CanvasWindow extends JFrame{
     private final static JLabel imageLabel = new JLabel();
     private final static ImageIcon icon = new ImageIcon();
 
-    private final static JScrollPane scrollPane = new JScrollPane();
+    public final static JScrollPane scrollPane = new JScrollPane();
     private final static int screenColCount = Toolkit.getDefaultToolkit().getScreenSize().width,
                              screenRowCount = Toolkit.getDefaultToolkit().getScreenSize().height;
+    public static int tempWidth, tempHeight;
+
+    public static Graphics2D g;
 
     /**
      * Creates a new CanvasWindow window.
@@ -49,7 +52,7 @@ public class CanvasWindow extends JFrame{
         // Initiating Canvas Window Base
         setMinimumSize(new Dimension(300, 300));
         setSize(600, 500);
-        setTitle("Open a BMP or SLC file and it will show up here.");
+        setTitle(StringBundle.getInstance().getString("CNV_INFO"));
         setLayout(new BorderLayout());
 
         // Adding the scroll pane for scrollability
@@ -61,6 +64,8 @@ public class CanvasWindow extends JFrame{
 
         WindowActions.centerWindow(this);
         setVisible(true);
+
+        g = (Graphics2D) getGraphics();
     }
 
     /**
@@ -71,6 +76,15 @@ public class CanvasWindow extends JFrame{
     public void showImage(BufferedImage image) {
         // Removing and re-adding are crucial so that user won't
         // have to resize the window for image to show up.
+
+        for(int i = 0; i < SLICCodec.colCount; i++){
+            image.setRGB(i, SLICCodec.rowCount, Color.lightGray.getRGB());
+            image.setRGB(i, SLICCodec.rowCount + 1, Color.lightGray.getRGB());
+        }
+        for(int i = 0; i < SLICCodec.rowCount; i++){
+            image.setRGB(SLICCodec.colCount, i, Color.lightGray.getRGB());
+            image.setRGB(SLICCodec.colCount + 1, i, Color.lightGray.getRGB());
+        }
 
         // Viewing the buffered image to the scrollpane
         scrollPane.getViewport().remove(imageLabel);
@@ -87,6 +101,28 @@ public class CanvasWindow extends JFrame{
         WindowActions.centerWindow(this);
 
         if(FileOperations.path != null)
-            setTitle(FileOperations.filename);
+            setTitle(FileOperations.filename + " " + SLICCodec.colCount + "x" + SLICCodec.rowCount + " ( px.)");
+
+    }
+
+    void paintComponent(int x1, int y1, int x2, int y2){
+        super.paintComponents(g);
+
+        tempWidth = Math.abs(x2-x1);
+        tempHeight = Math.abs(y2-y1);
+
+        switch(Inspector.mode){
+            case Inspector.LINE:
+                g.drawLine(x1, y1, x2, y2);
+                break;
+            case Inspector.RECTANGLE:
+                g.drawRect(x2 < x1 ? x2 : x1, y2 < y1 ? y2 : y1, tempWidth, tempHeight);
+                break;
+            case Inspector.CIRCLE:
+                g.drawOval(x2 < x1 ? x2 : x1, y2 < y1 ? y2 : y1, tempWidth, tempHeight);
+
+        }
+
+
     }
 }

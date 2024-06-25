@@ -20,8 +20,8 @@
 import com.formdev.flatlaf.util.SystemInfo;
 import com.formdev.flatlaf.extras.FlatDesktop;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 
 import java.awt.image.BufferedImage;
 
@@ -29,19 +29,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
-import javax.swing.JFileChooser;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-
-import javax.swing.UIManager;
-import javax.swing.WindowConstants;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class Main {
+    
+    static final int MANIPOFFSET = 25;
+    private static ResourceBundle resourceBundle = StringBundle.getInstance();
 
     // image : The object that is sent to the canvasWindow,
     //          it ALWAYS stores the final output image from bmp or slc files.
@@ -49,13 +48,22 @@ public class Main {
     //              That's how I managed to got it to work so don't question.
     static BufferedImage image = new BufferedImage(5000, 5000, BufferedImage.TYPE_INT_ARGB),
                          tempImage;
+    static Graphics2D imageGraphic = (Graphics2D) image.getGraphics();
+
     static CanvasWindow canvasWindow;
     static final int SLC_IMAGE = 0, BITMAP = 1;
     static Inspector inspector;
     static JMenuItem saveBMPFileItem, saveSLCFileItem;
 
+    // These four integers will be used for image manipulation purposes.
+    static int x1, x2, y1, y2, scrollX, scrollY, windowMouseX, windowMouseY;
+    static Point mousePoint;
+    static NewDialog newFile;
+
+
     // The entrance function.
     public static void main(String[] args) throws Exception {
+
 
         // Using Mac's own toolbar instead of in-window toolbar.
         if(System.getProperty("os.name").toLowerCase().contains("mac"))
@@ -64,6 +72,8 @@ public class Main {
         // Making the app look sleek
         UIManager.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
 
+        newFile = new NewDialog();
+
         // Changing the default java "about" dialog with the one we created.
         FlatDesktop.setAboutHandler( () -> About.getInstance().setVisible(true));
 
@@ -71,22 +81,24 @@ public class Main {
         JMenuBar applicationMenuBar = new JMenuBar();
 
         // Initiating the menu items
-        JMenu fileMenu = new JMenu("File"),
-              windowMenu = new JMenu("Window");
+        JMenu fileMenu = new JMenu(resourceBundle.getString("BAR_FILE")),
+              windowMenu = new JMenu(resourceBundle.getString("BAR_WINDOW"));
         applicationMenuBar.add(fileMenu); applicationMenuBar.add(windowMenu);
 
         // Initiating the menu commands
-        JMenuItem openFileItem = new JMenuItem("Open..."),
-                showInspector = new JMenuItem("Show Inspector"),
-                centerCanvas = new JMenuItem("Center Viewer");
-        saveBMPFileItem = new JMenuItem("Save as BITMAP");
-        saveSLCFileItem = new JMenuItem("Save as SLIC");
-        fileMenu.add(openFileItem);
+        JMenuItem newFileItem = new JMenuItem(resourceBundle.getString("BAR_FILE_NEW")),
+                openFileItem = new JMenuItem(resourceBundle.getString("BAR_FILE_OPEN")),
+                showInspector = new JMenuItem(resourceBundle.getString("BAR_WINDOW_INSPECTOR")),
+                centerCanvas = new JMenuItem(resourceBundle.getString("BAR_WINDOW_VIEWER"));
+        saveBMPFileItem = new JMenuItem(resourceBundle.getString("BAR_FILE_BMP"));
+        saveSLCFileItem = new JMenuItem(resourceBundle.getString("BAR_FILE_SLC"));
+        fileMenu.add(newFileItem); fileMenu.add(openFileItem);
         fileMenu.add(saveSLCFileItem); fileMenu.add(saveBMPFileItem);
 
         windowMenu.add(showInspector); windowMenu.add(centerCanvas);
 
         // Assigning the methods for the menu commands
+        newFileItem.addActionListener(e -> createFile());
         openFileItem.addActionListener(e -> openFile());
         saveBMPFileItem.addActionListener(e -> saveFile(BITMAP));
         saveSLCFileItem.addActionListener(e -> saveFile(SLC_IMAGE));
@@ -95,7 +107,7 @@ public class Main {
 
         // If NOT running on a mac, add About command to the Window section
         if(!System.getProperty("os.name").toLowerCase().contains("mac")) {
-            JMenuItem aboutMenuItem = new JMenuItem("About SLIC Viewer");
+            JMenuItem aboutMenuItem = new JMenuItem(resourceBundle.getString("ABOUT_TITLE"));
             windowMenu.add(aboutMenuItem);
             aboutMenuItem.addActionListener(e -> About.getInstance().setVisible(true));
         }
@@ -108,11 +120,82 @@ public class Main {
         Inspector.open.addActionListener(e -> openFile());
         Inspector.saveAsBMP.addActionListener(e -> saveFile(BITMAP));
         Inspector.saveAsSLC.addActionListener(e -> saveFile(SLC_IMAGE));
+        Inspector.newFile.addActionListener(e -> createFile());
 
         // Initiating the Canvas window
         canvasWindow = new CanvasWindow();
         canvasWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         canvasWindow.setJMenuBar(applicationMenuBar);
+
+        // Inititating the image manipulation instructions
+        CanvasWindow.scrollPane.getViewport().addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                Point p = CanvasWindow.scrollPane.getViewport().getViewPosition();
+                scrollX = p.x;
+                scrollY = p.y;
+            }
+        });
+
+        CanvasWindow.scrollPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                getNewCursorPosition();
+
+                imageGraphic.setColor(Inspector.color1);
+                imageGraphic.setStroke(new BasicStroke(Inspector.thicknessControl.getValue()));
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                canvasWindow.repaint();
+                int tempX = mousePoint.x - canvasWindow.getX() + scrollX;
+                int tempY = mousePoint.y - canvasWindow.getY() + scrollY;
+
+                switch(Inspector.mode){
+                    case Inspector.LINE:
+                        imageGraphic.drawLine(x2, y2 - 3, tempX, tempY - MANIPOFFSET - 3);
+                        break;
+
+                    case Inspector.RECTANGLE:
+                        if(inspector.fill.isSelected())
+                            imageGraphic.fillRect(tempX < x2 ? tempX : x2, tempY < y2 ? tempY - MANIPOFFSET - 3 : y2 - 3, CanvasWindow.tempWidth, CanvasWindow.tempHeight);
+                        else imageGraphic.drawRect(tempX < x2 ? tempX : x2, tempY < y2 ? tempY - MANIPOFFSET - 3 : y2 - 3, CanvasWindow.tempWidth, CanvasWindow.tempHeight);
+                        break;
+
+                    case Inspector.CIRCLE:
+                        if(inspector.fill.isSelected())
+                            imageGraphic.fillOval(tempX < x2 ? tempX : x2, tempY < y2 ? tempY - MANIPOFFSET - 3 : y2 - 3, CanvasWindow.tempWidth, CanvasWindow.tempHeight);
+                        else imageGraphic.drawOval(tempX < x2 ? tempX : x2, tempY < y2 ? tempY - MANIPOFFSET - 3 : y2 - 3, CanvasWindow.tempWidth, CanvasWindow.tempHeight);
+                        break;
+                }
+            }
+        });
+
+        CanvasWindow.scrollPane.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                switch(inspector.mode) {
+                    case Inspector.PEN:
+                        x1 = x2;
+                        y1 = y2;
+
+                        getNewCursorPosition();
+                        imageGraphic.drawLine(x1, y1, x2, y2);
+                        canvasWindow.repaint();
+                        break;
+
+                    // Unlike PEN mode, since you need to preview the drawn object without actually applying on image,
+                    // it draws a preview on the canvasWindow.
+                    // For the actual geometric object application, see line XX
+                    case Inspector.LINE: case Inspector.RECTANGLE: case Inspector.CIRCLE:
+                        mousePoint = MouseInfo.getPointerInfo().getLocation();
+                        canvasWindow.paintComponent(windowMouseX, windowMouseY + MANIPOFFSET, mousePoint.x - canvasWindow.getX(),
+                                mousePoint.y - canvasWindow.getY());
+                        break;
+                }
+            }
+        });
 
 
         // When the window state changes this is how the inspector window is manipulated.
@@ -149,6 +232,9 @@ public class Main {
         inspector.setLocation(50, canvasWindow.getY());
         canvasWindow.setVisible(true);
         inspector.setVisible(true);
+
+        // Changing the language of JFileChooser to Turkish if language is Turkish, otherwise, English
+        FileOperations.initializeJFileChooser();
     }
 
     /*
@@ -220,6 +306,15 @@ public class Main {
         } catch (Exception e) { throw new RuntimeException(e); }
     }
 
+    // Calculating the cursor position relative to the canvas and assigning them to x2 and y2 variables.
+    public static void getNewCursorPosition(){
+        mousePoint = MouseInfo.getPointerInfo().getLocation();
+        windowMouseX = mousePoint.x - canvasWindow.getX();
+        windowMouseY = mousePoint.y - canvasWindow.getY() - MANIPOFFSET;
+        x2 = windowMouseX + scrollX;
+        y2 = windowMouseY + scrollY;
+    }
+
     public static void saveFile(int mode) {
         try {
             FileOperations.loadFileTo(JFileChooser.DIRECTORIES_ONLY);
@@ -240,8 +335,7 @@ public class Main {
                 String destination = FileOperations.path + ext; // Target path
 
                 if(Files.exists(Paths.get(destination)))
-                    JOptionPane.showMessageDialog(null,
-                                         "This file already exists, find something else bi zahmet");
+                    JOptionPane.showMessageDialog(null, resourceBundle.getString("FILE_ERR"));
 
                 else if(mode == BITMAP) { // Saving as a bitmap image
 
@@ -260,10 +354,32 @@ public class Main {
                                             // Compressing the image .slc and writing to file.
 
                 inspector.setInformation(FileOperations.filename, SLICCodec.colCount, SLICCodec.rowCount);
-                canvasWindow.setTitle(FileOperations.filename);
+                canvasWindow.setTitle(FileOperations.filename + " " + SLICCodec.colCount + "x" + SLICCodec.rowCount + " ( px.)");
 
                 canvasWindow.setVisible(true);
             }
         } catch (IOException e) { throw new RuntimeException(e); }
     }
+
+    public static void createFile() {
+        newFile.accepted = false;
+        newFile.setVisible(true);
+
+        if(newFile.accepted) {
+            SLICCodec.rowCount = (short) newFile.height;
+            SLICCodec.colCount = (short) newFile.width;
+
+            // Clearing the canvas
+            image.getGraphics().fillRect(0, 0, 5000, 5000);
+
+
+            canvasWindow.showImage(image);
+            canvasWindow.setTitle(StringBundle.getInstance().getString("CREATE_FILE_TITLE")
+                    + " " + SLICCodec.colCount + "x" + SLICCodec.rowCount + " ( px.)");
+
+            inspector.setInformation(StringBundle.getInstance().getString("CREATE_FILE_TITLE"), newFile.width, newFile.height);
+        }
+    }
+    
+
 }
