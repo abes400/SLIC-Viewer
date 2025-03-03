@@ -20,7 +20,9 @@
 import com.formdev.flatlaf.icons.*;
 
 import java.awt.*;
+import java.awt.Font;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -39,7 +41,7 @@ public class Inspector extends JDialog {
     // Initializing the strings
 
     private static ResourceBundle resourceBundle = StringBundle.getInstance();
-    private final static JLabel fillLBL = new JLabel();
+    private final static JLabel fillLBL = new JLabel("5");
 
     // Initializing the buttons
     public static JButton open = new JButton(),
@@ -47,10 +49,11 @@ public class Inspector extends JDialog {
                           saveAsSLC = new JButton(".slc"),
                           saveAsBMP = new JButton(".bmp"),
                           currentColor = new JButton(),
-                          pen = new JButton(),
-                          line = new JButton(),
-                          rectangle = new JButton(),
-                          circle = new JButton();
+                          pen = new JButton("1"),
+                          line = new JButton("2"),
+                          rectangle = new JButton("3"),
+                          circle = new JButton("4");
+
 
     public final static int PEN = 0, LINE = 1, RECTANGLE = 2, CIRCLE = 3;
 
@@ -71,7 +74,7 @@ public class Inspector extends JDialog {
      * Creates a new Inspector dialog.
      * @since 1.0
      */
-    public Inspector() {
+    public Inspector() throws IOException, FontFormatException{
         // Initializing the dialog base
         setTitle(resourceBundle.getString("INSPECTOR_TITLE"));
         if(System.getProperty("os.name").toLowerCase().contains("mac"))
@@ -90,6 +93,13 @@ public class Inspector extends JDialog {
         colorGri.setLayout(null);
         setLayout(new BorderLayout());
 
+
+        // Initializing button Icons
+        Font toolIcons = Font.createFont(Font.TRUETYPE_FONT, new File("src/Artworks/slc-icons.ttf"))
+                .deriveFont(Font.PLAIN, 12f);
+        GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(toolIcons);
+
+
         // Setting Button props.
         open.setFocusable(false);
         open.setIcon(new FlatFileViewFileIcon());
@@ -104,50 +114,30 @@ public class Inspector extends JDialog {
 
         pen.setFocusable(false);
         pen.setBounds(140, 60, 30, 30);
+        pen.setFont(toolIcons);
 
         rectangle.setFocusable(false);
         rectangle.setBounds(140, 90, 30, 30);
+        rectangle.setFont(toolIcons);
 
         circle.setFocusable(false);
         circle.setBounds(170, 90, 30, 30);
+        circle.setFont(toolIcons);
 
         line.setFocusable(false);
         line.setBounds(170, 60, 30, 30);
+        line.setFont(toolIcons);
 
         thicknessControl.setBounds(140, 120, 60, 30);
         thicknessControl.setFocusable(false);
 
         fill.setBounds(140, 150, 30, 30);
         fill.setFocusable(false);
-
         fillLBL.setBounds(170, 150, 30, 30);
+        fillLBL.setFont(toolIcons);
 
-        // Setting button icons
-        try{
-            pen.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
-                            getClass().getResource("/Artworks/pen.png")))
-                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
-
-            line.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
-                            getClass().getResource("/Artworks/line.png")))
-                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
-
-            rectangle.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
-                            getClass().getResource("/Artworks/rect.png")))
-                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
-
-            circle.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
-                            getClass().getResource("/Artworks/oval.png")))
-                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
-
-            fillLBL.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(
-                            getClass().getResource("/Artworks/fill.png")))
-                    .getScaledInstance(15, 15, Image.SCALE_DEFAULT)));
-
-            saveAsSLC.setIcon(new FlatFileViewFloppyDriveIcon());
-            saveAsBMP.setIcon(new FlatFileViewFloppyDriveIcon());
-        } catch (IOException e) {throw new RuntimeException(e);}
-
+        saveAsSLC.setIcon(new FlatFileViewFloppyDriveIcon());
+        saveAsBMP.setIcon(new FlatFileViewFloppyDriveIcon());
 
         add(subGri, BorderLayout.NORTH);
 
