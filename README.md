@@ -12,4 +12,4 @@ Compression</b> (aka. <b>SLIC</b>)
 
 # License
 
-[GNU GPL v3](https://github.com/abes400/Lunchpad/blob/main/LICENSE)
+[MIT License](https://github.com/abes400/SLIC-Viewer/blob/main/LICENSE)
