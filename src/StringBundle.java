@@ -1,3 +1,5 @@
+// Written by İ.K. Bilir (Abes400)
+
 import java.util.ResourceBundle;
 
 public class StringBundle {
